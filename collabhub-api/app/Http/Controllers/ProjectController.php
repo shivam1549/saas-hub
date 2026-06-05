@@ -47,4 +47,12 @@ class ProjectController extends Controller
         // Return a 201 Created status code with the new project
         return response()->json($project, 201);
     }
+
+    public function show($id)
+    {
+        // Find the project or throw a 404 error if it doesn't exist
+        $project = Project::findOrFail($id);
+        
+        return response()->json($project);
+    }
 }

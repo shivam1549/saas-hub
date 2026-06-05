@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Notifications\TaskActivityNotification;
+use App\Models\User;
+use App\Events\TaskUpdated;
 
 class TaskController extends Controller
 {
@@ -29,6 +32,7 @@ class TaskController extends Controller
 
         // 3. Now execute the query and return the results
         $tasks = $query->get();
+        
         
         return response()->json($tasks);
     }
@@ -61,8 +65,29 @@ class TaskController extends Controller
             ],
         ]);
 
+
         $validated['tenant_id'] = $tenantId;
         $task = Task::create($validated);
+
+             // 1. Safely grab the currently logged-in user making the request
+$currentUser = $request->user();
+
+if ($task->priority === 'high') {
+    // 2. Fetch admins safely. 
+    // If you DO have tenant_id in your database:
+    $admins = User::where('tenant_id', $currentUser->tenant_id)->where('role', 'admin')->get();
+    
+    // OR, if you DO NOT have tenant_id in your database yet, use this line instead:
+    // $admins = User::where('role', 'admin')->get();
+
+    foreach ($admins as $admin) {
+        $admin->notify(new TaskActivityNotification(
+            $task, 
+            "URGENT: High priority task created - {$task->title}", 
+            "urgent"
+        ));
+    }
+}
 
         return response()->json($task, 201);
     }
@@ -92,6 +117,28 @@ class TaskController extends Controller
         ]);
 
         $task->update($validated);
+
+             // 1. Safely grab the currently logged-in user making the request
+$currentUser = $request->user();
+
+if ($task->priority === 'high') {
+    // 2. Fetch admins safely. 
+    // If you DO have tenant_id in your database:
+    $admins = User::where('tenant_id', $currentUser->tenant_id)->where('role', 'admin')->get();
+    
+    // OR, if you DO NOT have tenant_id in your database yet, use this line instead:
+    // $admins = User::where('role', 'admin')->get();
+
+    foreach ($admins as $admin) {
+        $admin->notify(new TaskActivityNotification(
+            $task, 
+            "URGENT: High priority task created - {$task->title}", 
+            "urgent"
+        ));
+    }
+}
+// event(new TaskUpdated($task));
+broadcast(new TaskUpdated($task))->toOthers();
 
         return response()->json([
             'message' => 'Task updated successfully',

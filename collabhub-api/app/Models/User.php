@@ -55,4 +55,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Task::class, 'assignee_id');
     }
+    // Inside class User extends Authenticatable
+    public function projects()
+    {
+        // Adjust this depending on your setup. 
+        // If users are linked to projects via a pivot table (many-to-many):
+        return $this->belongsToMany(Project::class);
+        
+        // OR if projects just have a user_id (one-to-many):
+        // return $this->hasMany(Project::class);
+    }
 }
