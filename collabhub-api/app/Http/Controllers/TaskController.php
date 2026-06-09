@@ -151,8 +151,13 @@ broadcast(new TaskUpdated($task))->toOthers();
      * Remove a task
      */
     public function destroy(Task $task)
-    {
-        $task->delete();
-        return response()->json(['message' => 'Task deleted']);
-    }
+{
+    // Capture the ID before deleting
+    $taskId = $task->id;
+
+    $task->delete();
+broadcast(new TaskUpdated($task))->toOthers();
+
+    return response()->json(['message' => 'Task deleted']);
+}
 }

@@ -9,7 +9,7 @@ import TaskPanel from './TaskPanel'; // Add this at the top
 
 // 1. Remove the static const todoTasks from here!
 // 2. Accept 'tasks' as a prop
-const KanbanBoardView = ({ tasks, setTasks, users, onAddtask}) => {
+const KanbanBoardView = ({ tasks, setTasks, users, onAddtask, onDeleteTask}) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [priorityFilter, setPriorityFilter] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState("");
@@ -196,13 +196,13 @@ console.log("Kanban Debug - Echo Instance:");
                   IMPORTANT: The droppable area MUST have an id that matches your status 
                   so dnd-kit knows when a card is dropped directly into an empty column!
                 */}
-                <DroppableColumn id="todo" title="To Do" columnTasks={todoTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} onTaskClick={setSelectedTask} userRole={userRole} />
+                <DroppableColumn id="todo" title="To Do" columnTasks={todoTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} onTaskClick={setSelectedTask} userRole={userRole} onDeleteTask={onDeleteTask} />
 
                 {/* --- IN PROGRESS COLUMN --- */}
-                <DroppableColumn id="in_progress" title="In Progress" columnTasks={inProgressTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} userRole={userRole} onTaskClick={setSelectedTask} />
+                <DroppableColumn id="in_progress" title="In Progress" columnTasks={inProgressTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} userRole={userRole} onTaskClick={setSelectedTask} onDeleteTask={onDeleteTask} />
 
                 {/* --- DONE COLUMN --- */}
-                <DroppableColumn id="done" title="Done" columnTasks={doneTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} userRole={userRole} onTaskClick={setSelectedTask} />
+                <DroppableColumn id="done" title="Done" columnTasks={doneTasks} onAddtask={onAddtask} users={users} setTasks={setTasks} userRole={userRole} onTaskClick={setSelectedTask} onDeleteTask={onDeleteTask} />
 
             </div>
         </DndContext>
@@ -221,7 +221,7 @@ console.log("Kanban Debug - Echo Instance:");
 // ---------------------------------------------------------
 import { useDroppable } from '@dnd-kit/core';
 
-function DroppableColumn({ id, title, columnTasks, onAddtask, userRole, users, setTasks, onTaskClick }) {
+function DroppableColumn({ id, title, columnTasks, onAddtask, userRole, users, setTasks, onTaskClick, onDeleteTask }) {
     // This hook makes the whole column a valid drop target
     const { setNodeRef } = useDroppable({ id: id });
 
@@ -240,7 +240,7 @@ function DroppableColumn({ id, title, columnTasks, onAddtask, userRole, users, s
                 </div>
             ) : (
                 <SortableContext items={columnTasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
-                    {columnTasks.map(task => <TaskCard key={task.id} task={task} users={users} setTasks={setTasks} onTaskClick={onTaskClick} />)}
+                    {columnTasks.map(task => <TaskCard key={task.id} task={task} users={users} setTasks={setTasks} onTaskClick={onTaskClick} onDeleteTask={onDeleteTask} />)}
                 </SortableContext>
             )}
 

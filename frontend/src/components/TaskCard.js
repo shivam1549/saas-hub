@@ -1,10 +1,10 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Maximize2 } from 'lucide-react'; // 🔥 Import the new Expand icon
+import { Maximize2, Trash2 } from 'lucide-react'; // 🔥 Import the new Expand icon
 import api from '@/api/axios';
 
-export default function TaskCard({ task, users = [], setTasks, onTaskClick, onContextMenu }) {
+export default function TaskCard({ task, users = [], setTasks, onTaskClick, onContextMenu, onDeleteTask }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -93,6 +93,19 @@ export default function TaskCard({ task, users = [], setTasks, onTaskClick, onCo
                 ))}
             </select>
         </div>
+
+        {/* 🔥 NEW ACTIONS BAR */}
+    <div className="flex items-center gap-1" onPointerDown={(e) => e.stopPropagation()}>
+       
+        
+        <button
+            onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
+            className="text-slate-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-lg transition-colors"
+            title="Delete Task"
+        >
+            <Trash2 size={14} />
+        </button>
+    </div>
 
         <span className="text-[10px] font-medium text-slate-400">Task #{task.id}</span>
       </div>

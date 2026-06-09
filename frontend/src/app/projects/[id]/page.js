@@ -13,7 +13,7 @@ import InviteModal from '@/components/InviteModal';
 import DashboardView from '@/components/DashboardView';
 import { useEchoListener } from '@/hooks/useEcho';
 import CrossWindowSyncTester from '@/components/CrossWindowSyncTester';
-
+import toast from 'react-hot-toast';
 export default function ProjectDetail({ params }) {
     const { id: projectId } = useParams();
     const [activeTab, setActiveTab] = useState('Board');
@@ -28,6 +28,25 @@ export default function ProjectDetail({ params }) {
     const [project, setProject] = useState(null);
     const [tasks, setTasks] = useState([]);
     const [sprints, setSprints] = useState([]);
+
+   const handleDeleteTask = async (taskId) => {
+    const isConfirmed = window.confirm("Are you sure you want to delete this task?");
+    if (!isConfirmed) return;
+
+    console.log("Starting deletion for:", taskId); // <-- CHECK THIS
+
+    const previousTasks = [...tasks];
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+
+    try {
+        const response = await api.delete(`/tasks/${taskId}`);
+        console.log("API response:", response); // <-- CHECK THIS
+        toast.success('Task deleted successfully!');
+    } catch (error) {
+        console.error("Delete error details:", error); // <-- CHECK THIS
+        setTasks(previousTasks);
+    }
+};
 
     const fetchData = async () => {
         try {
@@ -49,7 +68,7 @@ export default function ProjectDetail({ params }) {
         fetchData();
     }, [projectId]);
 // This forces the library to print everything it hears to the browser console
-window.Pusher.logToConsole = true;
+// window.Pusher.logToConsole = true;
     // --- Event: Handle Real-time Task Updates via Echo/Pusher ---
     const handleTaskUpdated = useCallback((event) => {
        
@@ -264,6 +283,7 @@ window.Pusher.logToConsole = true;
                         users={users}
                      
                         onAddtask={() => setIsTaskModalOpen(true)}
+                        onDeleteTask={handleDeleteTask}
                     />
                 )}
                 {activeTab === 'Planner' && (
